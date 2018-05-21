@@ -1,29 +1,60 @@
 <template>
     <div class="login">
-        <el-form ref="form" :model="form" class="container">
+        <el-form ref="form" :model="form" :rules="rules" class="container">
             <el-form-item>
                 <img src="../assets/avatar.jpg" class="avtar">
             </el-form-item>
-            <el-form-item>
-                <el-input v-model="form.username" placeholder="账户" prefix-icon="myicon myicon-user"></el-input>
+            <el-form-item prop="username">
+                <el-input v-model="form.username" placeholder="用户名" prop="username" prefix-icon="myicon myicon-user"></el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+                <el-input type="password" v-model="form.password" placeholder="密码" prefix-icon="myicon myicon-key"></el-input>
             </el-form-item>
             <el-form-item>
-                <el-input v-model="form.password" placeholder="密码" prefix-icon="myicon myicon-key"></el-input>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" class = "login-btn">登录</el-button>
+                <el-button type="primary" class = "login-btn" @click="loginSubmit('form')">登录</el-button>
             </el-form-item>
         </el-form>    
     </div>
 </template>
 <script>
+    import {checkUser} from '@/api'
     export default {
         data(){
             return {
                 form:{
                     username:'',
                     password:''
+                },
+                rules:{
+                    username:[
+                        { required: true, message: '请输入用户名', trigger: 'blur' },
+                    ],
+                    password:[
+                        { required: true, message: '请输入密码', trigger: 'blur' },
+                    ]
                 }    
+            }
+        },
+        methods:{
+            loginSubmit(formName){
+                this.$refs[formName].validate(value=>{
+                    if(value){
+                        checkUser(this.form).then(res=>{
+                            if(res.meta.status===200){
+                                // 保存token
+                                localStorage.setItem('mytoken',res.data.token);
+                                this.$router.push({name:'Home'})//路由跳转
+                            }else{
+                                this.$message({
+                                    message: res.meta.msg,
+                                    type: 'error'
+                                });
+                            }
+                        })
+                    } else {
+                        
+                    }
+                })
             }
         }
     }

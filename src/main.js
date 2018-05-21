@@ -11,6 +11,23 @@ import './styles/index.scss'
 Vue.use(ElementUI)
 Vue.config.productionTip = false
 
+// 注册一个全局守卫，所用是在路由跳转前对路由进行判断，防止未登录的用户跳转到其他页面去
+router.beforeEach((to,from,next)=>{
+  let token = localStorage.getItem('mytoken');
+  // 有token 随你跳
+  if(token){
+    next();
+  } else {
+    // 没有token，只能跳到login
+    if(to.path !== '/login'){
+      next({path:'./login'})
+    } else {
+      next();
+    }
+  }
+})
+
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
