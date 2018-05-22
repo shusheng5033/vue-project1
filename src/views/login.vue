@@ -43,6 +43,8 @@
                             if(res.meta.status===200){
                                 // 保存token
                                 localStorage.setItem('mytoken',res.data.token);
+                                // 登录成功的时候讲用户名保存到state中,触发mutation函数
+                                this.$store.commit('setUsername',res.data.username);
                                 this.$router.push({name:'Home'})//路由跳转
                             }else{
                                 this.$message({
