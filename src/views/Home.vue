@@ -1,25 +1,130 @@
 <template>
     <div class="home">
-        首页组件    
+        <el-container>
+            <el-aside width="auto">
+                <div class="logo"></div>
+                <el-menu
+                    default-active="1"
+                    class="el-menu-admin"
+                    :collapse = "isCollapse"
+                    @open="handleOpen"
+                    @close="handleClose"
+                    background-color="#545c64"
+                    text-color="#fff"
+                    active-text-color="#ffd04b">
+                    <el-submenu index="1">
+                        <template slot="title">
+                            <i class="el-icon-location"></i>
+                            <span>用户管理</span>
+                        </template>
+                        <el-menu-item index="1">
+                            <i class="el-icon-menu"></i>
+                            <span>用户列表</span>
+                        </el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+            <el-container>
+                <el-header>
+                    <!-- header部分 -->
+                    <i class="myicon myicon-menu toggle-btn" @click="toggleCollapse"></i>
+                    <div class="system-title">VUE电商管理系统</div>
+                    <div>
+                        <span class="welcome">欢迎，xxx</span>
+                        <el-button type="text" @click="out">退出</el-button>
+                    </div>
+                </el-header>
+                <el-main>
+                    <router-view></router-view>
+                </el-main>
+            </el-container>
+        </el-container> 
     </div>    
 </template>
 <script>
     import {getUserList} from '@/api'
     export default {
-        mounted(){
-            let params = {
-                params:{
-                    query:'',
-                    pagenum:1,
-                    pagesize:5
-                }
+        data(){
+            return {
+                isCollapse:false
             }
-            getUserList(params).then(res => {
-                console.log(res);
-            })
+        },
+        methods: {
+            handleOpen(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            handleClose(key, keyPath) {
+                console.log(key, keyPath);
+            },
+            // 侧边栏隐藏显示
+            toggleCollapse(){
+                this.isCollapse = !this.isCollapse;
+            },
+            // 用户退出按钮
+            out(){
+                // 清除localStorage
+                localStorage.removeItem('mytoken');
+                // 并且跳转到登录页面
+                this.$router.push({name:'login'});
+            }
         }
+        // mounted(){
+        //     let params = {
+        //         params:{
+        //             query:'',
+        //             pagenum:1,
+        //             pagesize:5
+        //         }
+        //     }
+        //     getUserList(params).then(res => {
+        //         console.log(res);
+        //     })
+        // }
     }
 </script>
 <style lang="scss" scoped>
-
+    .home {
+        height: 100%;
+        background-color: #E5E5E5;
+        .el-menu-admin:not(.el-menu--collapse) {
+            width: 200px;
+            min-height: 400px;
+        }
+        .el-container {
+            height: 100%;
+        }
+        .el-aside {
+            background-color: #545c64;
+        }
+        .el-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #009688;
+        }
+        .logo {
+            height:60px;
+            background: url(../assets/logo.png) no-repeat center;
+            background-size: contain;
+            background-color: white;
+        }
+        .toggle-btn {
+            padding: 0 10px;
+            margin-left: -20px;
+            font-size: 36px;
+            line-height: 60px;
+            color: white;
+            cursor: pointer;
+            &:hover {
+            background-color: #00635a;
+            }
+        }
+        .system-title {
+            font-size: 28px;
+            color: white;
+        }
+        .welcome, {
+            color: white;
+        }
+    }
 </style>

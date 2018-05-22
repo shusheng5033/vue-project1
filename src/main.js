@@ -20,7 +20,7 @@ router.beforeEach((to,from,next)=>{
   } else {
     // 没有token，只能跳到login
     if(to.path !== '/login'){
-      next({path:'./login'})
+      next({path:'/login'})
     } else {
       next();
     }
