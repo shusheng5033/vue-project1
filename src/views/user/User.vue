@@ -32,7 +32,7 @@
                     <el-table-column label="操作">
                         <template slot-scope="scope">
                             <el-button type="primary" icon="el-icon-edit" size="mini" plain @click="showEditDialog(scope.row)"></el-button>
-                            <el-button type="danger" icon="el-icon-delete" size="mini" plain></el-button>
+                            <el-button type="danger" icon="el-icon-delete" size="mini" plain @click="showDeleteDialog(scope.row)"></el-button>
                             <el-button type="warning" icon="el-icon-check" size="mini" plain></el-button>
                         </template>
                     </el-table-column>
@@ -93,10 +93,11 @@
     </div>
 </template>
 <script>
-import {getUserList,changeUserState,addUser,getUserById,editUser} from '@/api'
+import {getUserList,changeUserState,addUser,getUserById,editUser,deleteUser} from '@/api'
 export default {
     data() {
       return {
+        // 主数据渲染
         userList: [],
         query:'',
         total:0,
@@ -104,18 +105,21 @@ export default {
         currentPage:1,
         addDialogFormVisible:false,
         editDialogFormVisible:false,
+        // 添加用户的表单
         addForm:{
             username:'',
             password:'',
             email:'',
             mobile:''
         },
+        //编辑表单
         editForm:{
             username:'',
             email:'',
             mobile:'',
             id:0
         },
+        //检验规则
         rules: {
             username: [
                 { required: true, message: '请输入用户名', trigger: 'blur' }
@@ -137,19 +141,19 @@ export default {
         this.initList();
     },
     methods: {
-    // 每页显示条数改变
+        //每页显示条数改变
         handleSizeChange(val) {
             this.pageSize = val;
             console.log(`每页 ${val} 条`);
             this.initList();
         },
-    //   当前页码改变
+        //当前页码改变
         handleCurrentChange(val) {
             this.currentPage = val;
             console.log(`当前页: ${val}`);
             this.initList();
         },
-    //   switch按钮发生改变
+        //switch按钮发生改变
         changeUserState(row){
             changeUserState({uid:row.id,type:row.mg_state}).then(res=>{
                if(res.meta.status === 200){
@@ -217,7 +221,35 @@ export default {
                 }
             })
         },
-        //   获取数据并渲染
+        // 删除用户
+        showDeleteDialog(row){
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+            }).then(() => {
+                deleteUser(row.id).then(res => {
+                    if(res.meta.status === 200){
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功!'
+                        });
+                        this.initList();
+                    }else {
+                        this.$message({
+                            type: 'warning',
+                            message: res.meta.msg
+                        });
+                    }
+                })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });          
+            });
+        },
+        // 获取数据并渲染
         initList(){
             let params = {
                   params:{
