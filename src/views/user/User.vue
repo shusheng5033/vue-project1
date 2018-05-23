@@ -14,7 +14,7 @@
                 <el-input placeholder="请输入内容" class="search-input" v-model="query" @keyup.native.enter="initList">
                     <el-button slot="append" icon="el-icon-search" @click="initList"></el-button>
                 </el-input>
-                <el-button type="success" plain>添加用户</el-button>
+                <el-button type="success" plain @click="addDialogFormVisible=true">添加用户</el-button>
             </el-col>
         </el-row>
         <el-row>
@@ -39,21 +39,44 @@
                 </el-table>
             </el-col>
         </el-row>
+        <!-- 分页组件 -->
         <div class="page">
              <el-pagination
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page="currentPage"
-                :page-sizes="[2, 3, 4, 5]"
+                :page-sizes="[2, 4, 6, 8]"
                 :page-size='pageSize'
                 layout="total, sizes, prev, pager, next, jumper"
                 :total='total'>
             </el-pagination>
         </div>
+        <!-- 添加用户对话框 -->
+        <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
+            <el-form :model="addForm"  label-width="80px"  :rules="rules" ref="addUserForm">
+                <el-form-item label="用户名" prop="username">
+                    <el-input v-model="addForm.username" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="密码" prop="password">
+                    <el-input v-model="addForm.password" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="addForm.email" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="电话" prop="mobile">
+                    <el-input v-model="addForm.mobile" auto-complete="off"></el-input>
+                </el-form-item>
+             
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="addUserSubmit('addUserForm')">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 <script>
-import {getUserList,changeUserState} from '@/api'
+import {getUserList,changeUserState,addUser} from '@/api'
 export default {
     data() {
       return {
@@ -62,8 +85,28 @@ export default {
         total:0,
         pageSize:2,
         currentPage:1,
-        value:'true',
-        nameid:''
+        addDialogFormVisible:false,
+        addForm:{
+            username:'',
+            password:'',
+            email:'',
+            mobile:''
+        },
+        rules: {
+            username: [
+                { required: true, message: '请输入用户名', trigger: 'blur' }
+            ],
+            password: [
+                { required: true, message: '请输入密码', trigger: 'blur' }
+            ],
+            email: [
+                { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+                { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur,change' }
+            ],
+            mobile: [
+                { required: true, message: '电话不能为空' }
+            ]
+        }
       }
     },
     mounted(){
@@ -96,6 +139,23 @@ export default {
                        message:res.meta.msg
                    })
                }
+            })
+        },
+        // 添加用户
+        addUserSubmit(formName){
+            this.$refs[formName].validate(value=>{
+                if(value){
+                    addUser(this.addForm).then(res => {
+                        if(res.meta.status === 201){
+                            this.$message({
+                                type:'success',
+                                message:'创建用户成功'
+                            })
+                        }
+                        this.addDialogFormVisible = false;
+                        this.initList();
+                    })
+                }
             })
         },
     //   获取数据并渲染

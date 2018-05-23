@@ -28,5 +28,10 @@ export const getUserList = params => {
 
 // 更改用户状态
 export const changeUserState = params => {
-    return axios.put(`users/${params.uid}/state/${params.type}`).then(res=>res.data);  //es6字符串拼接   相当于===》"users/"+params.id+"/state/"+params.type
+    return axios.put(`users/${params.uid}/state/${params.type}`).then(res => res.data);  //es6字符串拼接   相当于===》"users/"+params.id+"/state/"+params.type
+}
+
+// 添加用户
+export const addUser = params =>{
+    return axios.post('users',params).then(res => res.data);
 }
