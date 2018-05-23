@@ -4,7 +4,7 @@
             <el-aside width="auto">
                 <div class="logo"></div>
                 <el-menu
-                    default-active="1"
+                    default-active="1-1"
                     class="el-menu-admin"
                     :collapse = "isCollapse"
                     @open="handleOpen"
@@ -17,7 +17,7 @@
                             <i class="el-icon-location"></i>
                             <span>用户管理</span>
                         </template>
-                        <el-menu-item index="1">
+                        <el-menu-item index="1-1">
                             <i class="el-icon-menu"></i>
                             <span>用户列表</span>
                         </el-menu-item>
