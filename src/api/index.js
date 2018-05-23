@@ -17,11 +17,16 @@ axios.interceptors.request.use(function (config) {
 
 
 //登录验证
-export const checkUser = param => {
-    return axios.post('login',param).then(res => res.data);
+export const checkUser = params => {
+    return axios.post('login',params).then(res => res.data);
 };
 
 // 请求用户数据列表
-export const getUserList = param => {
-    return axios.get('users',param).then(res => res.data);
+export const getUserList = params => {
+    return axios.get('users',params).then(res => res.data);
 };
+
+// 更改用户状态
+export const changeUserState = params => {
+    return axios.put(`users/${params.uid}/state/${params.type}`).then(res=>res.data);  //es6字符串拼接   相当于===》"users/"+params.id+"/state/"+params.type
+}
