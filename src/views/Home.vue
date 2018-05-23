@@ -68,18 +68,6 @@
                 this.$router.push({name:'login'});
             }
         }
-        // mounted(){
-        //     let params = {
-        //         params:{
-        //             query:'',
-        //             pagenum:1,
-        //             pagesize:5
-        //         }
-        //     }
-        //     getUserList(params).then(res => {
-        //         console.log(res);
-        //     })
-        // }
     }
 </script>
 <style lang="scss" scoped>

@@ -31,7 +31,7 @@
                     </el-table-column>
                     <el-table-column label="操作">
                         <template slot-scope="scope">
-                            <el-button type="primary" icon="el-icon-edit" size="mini" plain></el-button>
+                            <el-button type="primary" icon="el-icon-edit" size="mini" plain @click="showEditDialog(scope.row)"></el-button>
                             <el-button type="danger" icon="el-icon-delete" size="mini" plain></el-button>
                             <el-button type="warning" icon="el-icon-check" size="mini" plain></el-button>
                         </template>
@@ -66,31 +66,55 @@
                 <el-form-item label="电话" prop="mobile">
                     <el-input v-model="addForm.mobile" auto-complete="off"></el-input>
                 </el-form-item>
-             
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button @click="addDialogFormVisible = false">取 消</el-button>
                 <el-button type="primary" @click="addUserSubmit('addUserForm')">确 定</el-button>
+            </div>
+        </el-dialog>
+        <!-- 编辑用户对话框 -->
+        <el-dialog title="编辑用户" :visible.sync="editDialogFormVisible">
+            <el-form :model="editForm"  label-width="80px"  :rules="rules" ref="editUserForm">
+                <el-form-item label="用户名" prop="username">
+                    <el-input v-model="editForm.username" auto-complete="off" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="邮箱" prop="email">
+                    <el-input v-model="editForm.email" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="电话" prop="mobile">
+                    <el-input v-model="editForm.mobile" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="editDialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="editUserSubmit('editUserForm')">确 定</el-button>
             </div>
         </el-dialog>
     </div>
 </template>
 <script>
-import {getUserList,changeUserState,addUser} from '@/api'
+import {getUserList,changeUserState,addUser,getUserById,editUser} from '@/api'
 export default {
     data() {
       return {
         userList: [],
         query:'',
         total:0,
-        pageSize:2,
+        pageSize:8,
         currentPage:1,
         addDialogFormVisible:false,
+        editDialogFormVisible:false,
         addForm:{
             username:'',
             password:'',
             email:'',
             mobile:''
+        },
+        editForm:{
+            username:'',
+            email:'',
+            mobile:'',
+            id:0
         },
         rules: {
             username: [
@@ -158,7 +182,42 @@ export default {
                 }
             })
         },
-    //   获取数据并渲染
+        // 显示用户编辑框并根据id获取user信息
+        showEditDialog(row){
+            this.editDialogFormVisible = true;
+            // row表示该行数据信息，需要里面的id进行获取user信息
+            getUserById(row.id).then(res => {
+                if(res.meta.status === 200){
+                    this.editForm.username = res.data.username;
+                    this.editForm.email = res.data.email;
+                    this.editForm.mobile = res.data.mobile;
+                    this.editForm.id = res.data.id;
+                }
+            })
+        },
+        // 编辑用户
+        editUserSubmit(formName){
+            this.$refs[formName].validate(value => {
+                if(value){
+                    editUser(this.editForm).then(res => {
+                        if(res.meta.status === 200){
+                            this.$message({
+                                type:'success',
+                                message:'编辑成功'
+                            })
+                        }else {
+                            this.$message({
+                                type:'warning',
+                                message:this.meta.msg
+                            })
+                        }
+                        this.editDialogFormVisible = false;
+                        this.initList();
+                    })
+                }
+            })
+        },
+        //   获取数据并渲染
         initList(){
             let params = {
                   params:{
