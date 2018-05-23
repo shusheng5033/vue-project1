@@ -42,7 +42,7 @@
     </div>    
 </template>
 <script>
-    import {getUserList} from '@/api'
+    
     export default {
         data(){
             return {
