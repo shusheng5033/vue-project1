@@ -5,6 +5,7 @@
                 <div class="logo"></div>
                 <el-menu
                     class="el-menu-admin"
+                    :unique-opened = "true"
                     :router = "true"
                     :collapse = "isCollapse"
                     @open="handleOpen"
@@ -20,6 +21,20 @@
                         <el-menu-item index="/user">
                             <i class="el-icon-menu"></i>
                             <span>用户列表</span>
+                        </el-menu-item>
+                    </el-submenu>
+                    <el-submenu index = '2'>
+                        <template slot="title">
+                            <i class="el-icon-location"></i>
+                            <span>权限管理</span>
+                        </template>
+                        <el-menu-item index="/roles">
+                            <i class="el-icon-menu"></i>
+                            <span>角色列表</span>
+                        </el-menu-item>
+                        <el-menu-item index="/jurisdiction">
+                            <i class="el-icon-menu"></i>
+                            <span>权限列表</span>
                         </el-menu-item>
                     </el-submenu>
                 </el-menu>
