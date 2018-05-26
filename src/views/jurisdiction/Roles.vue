@@ -51,27 +51,118 @@
                 <template slot-scope="scope">
                     <el-button type="primary" icon="el-icon-edit" size="mini" plain></el-button>
                     <el-button type="danger" icon="el-icon-delete" size="mini" plain></el-button>
-                    <el-button type="warning" icon="el-icon-check" size="mini" plain></el-button>
+                    <el-button type="warning" icon="el-icon-check" size="mini" title="授权角色" plain @click="showDialog(scope.row)"></el-button>
                 </template>
             </el-table-column>
         </el-table>
+        <el-dialog title="授权角色" :visible.sync="dialogVisible">
+            <div class="treeList">
+                <el-tree
+                    :data="jurisdictionList"
+                    show-checkbox
+                    node-key="id"
+                    ref="tree"
+                    :default-expand-all="true"
+                    :default-checked-keys="selectedJuristiction"
+                    :props="defaultProps">
+                </el-tree>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="submitGrant">确 定</el-button>
+            </span>
+        </el-dialog>
     </div>
 </template>
 <script>
-import {getRoleList,deleteRoleJurisdiction} from '@/api'
+import {getRoleList,deleteRoleJurisdiction,getJurisdictionList,grantRoleJurisdiction} from '@/api'
 export default {
     data() {
       return {
-        roleList: []
+        //  角色列表数据
+        roleList: [],
+        dialogVisible:false,
+        // 权限列表数据
+        jurisdictionList: [],
+        defaultProps: {
+          children: 'children',
+          label: 'authName'
+        },
+        selectedJuristiction:[], //默认选中的权限id
+        currentJuristiction:{} //保存点击的角色
       }
     },
     methods:{
+        // 初始化数据
+        initRoleList(){
+            // 获取角色列表
+            getRoleList().then(res => {
+                if(res.meta.status === 200){
+                    this.roleList = res.data;
+                }
+            })
+        },
         // 删除权限功能
         deleteJurisdiction(row,jurisdictionId){
             deleteRoleJurisdiction({roleId:row.id,jurisdictionId:jurisdictionId}).then(res => {
                 if(res.meta.status === 200){
+                    // 将该行角色权限数据数组重新重新赋值
                     row.children = res.data;
-                    
+                } else {
+                    this.$message({
+                        type:'error',
+                        message:res.meta.msg
+                    })
+                }
+            })
+        },
+        showDialog(row){
+            this.dialogVisible = true;
+            this.currentJuristiction = row;
+            getJurisdictionList({type:'tree'}).then(res => {
+                if(res.meta.status === 200){
+                    this.jurisdictionList = res.data;
+                } else {
+                    this.$message({
+                        type:'error',
+                        message:res.meta.msg
+                    })
+                }
+            })
+            this.selectedJuristiction = [];
+            // 只需要遍历到第三层的数据即可，上面两层都只有一个
+            this.currentJuristiction.children.forEach(first => {
+                if(first.children && first.children.length !== 0){
+                    first.children.forEach(second => {
+                        if(second.children && second.children.length!==0){
+                            second.children.forEach(third => {
+                                this.selectedJuristiction.push(third.id);
+                                console.log(this.selectedJuristiction);
+                            })
+                        }
+                    })
+                }
+            })
+        },
+        // 提交授权
+        submitGrant(){
+            // 将数组转换成字符串
+            let ids = this.$refs.tree.getCheckedKeys().join(",");
+            let params = {
+                    roleId:this.currentJuristiction.id,
+                    rids:{
+                        rids:ids
+                    }
+            }
+            grantRoleJurisdiction(params).then(res => {
+                console.log(res)
+                if(res.meta.status === 200){
+                    this.$message({
+                        type:'success',
+                        message:res.meta.msg
+                    })
+                    this.dialogVisible = false;
+                    this.initRoleList();
                 } else {
                     this.$message({
                         type:'error',
@@ -82,13 +173,7 @@ export default {
         }
     },
     mounted(){
-        // 获取角色列表
-        getRoleList().then(res => {
-            if(res.meta.status === 200){
-                console.log(res)
-                this.roleList = res.data;
-            }
-        })
+        this.initRoleList();
     }
 }
 </script>
@@ -98,6 +183,10 @@ export default {
             margin-right:5px;
             margin-bottom:5px;
         }
+    }
+    .treeList {
+        height: 300px;
+        overflow:auto;
     }
 </style>
 

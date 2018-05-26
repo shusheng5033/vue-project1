@@ -70,3 +70,8 @@ export const getJurisdictionList = params => {
 export const deleteRoleJurisdiction = params => {
     return axios.delete(`roles/${params.roleId}/rights/${params.jurisdictionId}`).then(res => res.data);
 }
+
+//角色授权
+export const grantRoleJurisdiction = params => {
+    return axios.post(`roles/${params.roleId}/rights`,params.rids).then(res => res.data);
+}
