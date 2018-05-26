@@ -75,3 +75,28 @@ export const deleteRoleJurisdiction = params => {
 export const grantRoleJurisdiction = params => {
     return axios.post(`roles/${params.roleId}/rights`,params.rids).then(res => res.data);
 }
+
+// 添加角色
+export const addRole = params => {
+    return axios.post('roles',params).then(res => res.data);
+}
+
+//删除角色
+export const deleteRole = params => {
+    return axios.delete(`roles/${params.id}`).then(res => res.data);
+}
+
+// 根据id获取角色信息
+export const getRoleById = params => {
+    return axios.get(`roles/${params.id}`).then(res => res.data);
+}
+
+//编辑角色
+export const editRole = params => {
+    return axios.put(`roles/${params.id}`,params).then(res => res.data);
+}
+
+// 获取左侧菜单权限
+export const getMenus = ()=>{
+    return axios.get('menus').then(res => res.data);
+}

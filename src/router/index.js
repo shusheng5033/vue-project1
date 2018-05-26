@@ -28,12 +28,12 @@ export default new Router({
           component:welcome
         },
         {
-          path:'/user',
+          path:'/users',
           name:'User',
           component:User
         },
         {
-          path:'/jurisdiction',
+          path:'/rights',
           name:'Jurisdiction',
           component:Jurisdiction
         },

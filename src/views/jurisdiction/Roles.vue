@@ -10,9 +10,23 @@
                 </el-breadcrumb>
             </el-col>
         </el-row>
-        <el-button type="primary" plain>添加角色</el-button>
-
-          <el-table
+        <el-button type="primary" plain @click="addDialogFormVisible=true">添加角色</el-button>
+        <!-- 添加角色模态框 -->
+        <el-dialog title="添加角色" :visible.sync="addDialogFormVisible">
+            <el-form :model="addForm"  label-width="80px"  :rules="rules" ref="addRoleForm">
+                <el-form-item label="角色名称" prop="roleName">
+                    <el-input v-model="addForm.roleName" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="角色描述" prop="roleDesc">
+                    <el-input v-model="addForm.roleDesc" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addDialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="addRoleSubmit('addRoleForm')">确 定</el-button>
+            </div>
+        </el-dialog>
+        <el-table
             class = "mt-20"
             border
             :data="roleList"
@@ -49,12 +63,13 @@
             </el-table-column>
             <el-table-column label="操作">
                 <template slot-scope="scope">
-                    <el-button type="primary" icon="el-icon-edit" size="mini" plain></el-button>
-                    <el-button type="danger" icon="el-icon-delete" size="mini" plain></el-button>
+                    <el-button type="primary" icon="el-icon-edit" size="mini" title="编辑角色" plain @click ="showEditDialog(scope.row)"></el-button>
+                    <el-button type="danger" icon="el-icon-delete" size="mini" title="删除角色" plain @click="showDeleteDialog(scope.row)"></el-button>
                     <el-button type="warning" icon="el-icon-check" size="mini" title="授权角色" plain @click="showDialog(scope.row)"></el-button>
                 </template>
             </el-table-column>
         </el-table>
+        <!-- 授权角色模态框 -->
         <el-dialog title="授权角色" :visible.sync="dialogVisible">
             <div class="treeList">
                 <el-tree
@@ -72,16 +87,36 @@
                 <el-button type="primary" @click="submitGrant">确 定</el-button>
             </span>
         </el-dialog>
+        <!-- 编辑角色对话框 -->
+        <el-dialog title="编辑角色" :visible.sync="editDialogFormVisible">
+            <el-form :model="editForm"  label-width="80px"  :rules="rules" ref="editRoleForm">
+                <el-form-item label="角色名" prop="roleName">
+                    <el-input v-model="editForm.roleName" auto-complete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="角色描述" prop="roleDesc">
+                    <el-input v-model="editForm.roleDesc" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="editDialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="editRoleSubmit('editRoleForm')">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 <script>
-import {getRoleList,deleteRoleJurisdiction,getJurisdictionList,grantRoleJurisdiction} from '@/api'
+import {getRoleList,deleteRoleJurisdiction,getJurisdictionList,grantRoleJurisdiction,addRole,deleteRole,getRoleById,editRole} from '@/api'
 export default {
     data() {
       return {
         //  角色列表数据
         roleList: [],
+        // 授权
         dialogVisible:false,
+        // 添加
+        addDialogFormVisible:false,
+        // 编辑
+        editDialogFormVisible:false,
         // 权限列表数据
         jurisdictionList: [],
         defaultProps: {
@@ -89,7 +124,26 @@ export default {
           label: 'authName'
         },
         selectedJuristiction:[], //默认选中的权限id
-        currentJuristiction:{} //保存点击的角色
+        currentJuristiction:{}, //保存点击的角色
+        // 添加表单
+        addForm:{
+            roleName:'',
+            roleDesc:''
+        },
+        editForm:{
+            roleName:'',
+            roleDesc:'',
+            id:0
+        },
+        // 添加角色表单规则
+        rules: {
+            roleName: [
+                { required: true, message: '请输入角色名', trigger: 'blur' }
+            ],
+            roleDesc: [
+                { required: false, message: '请输入密码', trigger: 'change' }
+            ],
+        }
       }
     },
     methods:{
@@ -167,6 +221,90 @@ export default {
                     this.$message({
                         type:'error',
                         message:res.meta.msg
+                    })
+                }
+            })
+        },
+        // 添加角色
+        addRoleSubmit(formName){
+            this.$refs[formName].validate(value => {
+                if(value){
+                    addRole(this.addForm).then(res => {
+                        if(res.meta.status === 201){
+                            this.$message({
+                                type:'success',
+                                message:'创建角色成功'
+                            })
+                            this.addDialogFormVisible = false;
+                            this.initRoleList();
+                        }
+                    })
+                }
+            })
+        },
+        // 删除角色
+        showDeleteDialog(row){
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+            }).then(() => {
+                deleteRole(row).then(res => {
+                    if(res.meta.status === 200){
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功!'
+                        });
+                        this.initRoleList();
+                    }else {
+                        this.$message({
+                            type: 'warning',
+                            message: res.meta.msg
+                        });
+                    }
+                })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });          
+            });
+        },
+        // 编辑框开启
+        showEditDialog(row){
+            this.editDialogFormVisible = true;
+            getRoleById(row).then(res => {
+                if(res.meta.status === 200){
+                    this.editForm.roleName = res.data.roleName;
+                    this.editForm.roleDesc = res.data.roleDesc;
+                    this.editForm.id = res.data.roleId;
+                }else {
+                    this.$message({
+                        type:'warning',
+                        message:this.meta.msg
+                    })
+                }
+            })
+        },
+        //编辑提交
+        editRoleSubmit(formName){
+            this.$refs[formName].validate(value => {
+                if(value){
+                    editRole(this.editForm).then(res => {
+                        console.log(res);
+                        if(res.meta.status === 200){
+                            this.$message({
+                                type:'success',
+                                message:'编辑成功'
+                            })
+                            this.editDialogFormVisible = false;
+                            this.initRoleList();
+                        }else {
+                            this.$message({
+                                type:'warning',
+                                message:this.meta.msg
+                            })
+                        }
                     })
                 }
             })
