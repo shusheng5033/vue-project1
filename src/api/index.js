@@ -100,3 +100,8 @@ export const editRole = params => {
 export const getMenus = ()=>{
     return axios.get('menus').then(res => res.data);
 }
+
+// 获取商品分类信息
+export const getCategory = params => {
+    return axios.get('categories',params).then(res => res.data);
+}

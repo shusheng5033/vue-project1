@@ -6,6 +6,7 @@ import welcome from '@/views/welcome/welcome'
 import User from '@/views/user/User'
 import Jurisdiction from '@/views/jurisdiction/Jurisdiction'
 import Roles from '@/views/jurisdiction/Roles'
+import Category from '@/views/category/Category'
 
 Vue.use(Router)
 
@@ -23,24 +24,29 @@ export default new Router({
       redirect: {path:'welcome'},
       children:[
         {
-          path:'/welcome',
+          path:'welcome',
           name:'welcome',
           component:welcome
         },
         {
-          path:'/users',
+          path:'users',
           name:'User',
           component:User
         },
         {
-          path:'/rights',
+          path:'rights',
           name:'Jurisdiction',
           component:Jurisdiction
         },
         {
-          path:'/roles',
+          path:'roles',
           name:'Roles',
           component:Roles
+        },
+        {
+          path:'categories',
+          name:'Catgory',
+          component:Category
         },
       ]
     }
