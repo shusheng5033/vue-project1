@@ -105,3 +105,8 @@ export const getMenus = ()=>{
 export const getCategory = params => {
     return axios.get('categories',params).then(res => res.data);
 }
+
+// 添加分类
+export const addCategory = params => {
+    return axios.post('categories',params).then(res => res.data);
+}

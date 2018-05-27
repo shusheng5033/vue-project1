@@ -11,9 +11,30 @@
         </el-row>
         <el-row>
             <el-col :span="24">
-                <el-button type="success" class="add-btn" plain @click="addDialogFormVisible=true">添加商品</el-button>
+                <el-button type="success" class="add-btn" plain @click="showCategory">添加分类</el-button>
             </el-col>
         </el-row>
+        <!-- 添加分类对话框 -->
+        <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
+            <el-form :model="addForm"  label-width="80px"  :rules="rules" ref="addCateForm">
+                <el-form-item label="分类名称" prop="cat_name">
+                    <el-input v-model="addForm.cat_name" auto-complete="off"></el-input>
+                </el-form-item>
+                 <el-form-item label="父级名称">
+                    <el-cascader
+                        :options="options"
+                        :props="props"
+                        v-model="selectedOptions"
+                        @change="handleChange">
+                    </el-cascader>
+                </el-form-item>
+            </el-form>
+
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addCategory = false">取 消</el-button>
+                <el-button type="primary" @click="addCateSubmit('addCateForm')">确 定</el-button>
+            </div>
+        </el-dialog>
         <tree-grid
             v-loading="loading"
             :treeStructure="true"
@@ -40,13 +61,19 @@
 </template>
 <script>
 import TreeGrid from '@/components/TreeGrid/TreeGrid'
-import {getCategory} from '@/api'
+import {getCategory,addCategory} from '@/api'
 export default {
     data(){
         return {
             loading:false,
             addDialogFormVisible:false,
+            props:{
+                label:'cat_name',
+                value:'cat_id'
+            },
             dataSource: [],
+            selectedOptions:[],
+            options:[],
             total:0,
             currentPage:1,
             pagesize:10,
@@ -66,7 +93,19 @@ export default {
                 dataIndex: 'cat_level',
                 width: ''
                 }
-            ]
+            ],
+            addForm:{
+                cat_name:'',
+                cat_pid:0,
+                cat_level:0
+            },
+            // 校验规则
+            rules:{
+                cate_name: [
+                    { required: true, message: '请输入类名', trigger: 'blur' }
+                ],
+            }
+
         }
     },
     components:{
@@ -109,6 +148,45 @@ export default {
             this.currentPage = val;
             this.initList();
         },
+        // 添加分类获取数据
+        showCategory(){
+            this.addDialogFormVisible = true;
+            getCategory({type:2}).then(res => {
+                console.log(res)
+                if(res.meta.status === 200){
+                    this.options = res.data
+                }
+            })
+        },
+        // 添加分类提交
+        addCateSubmit(formName){
+            this.$refs[formName].validate(value => {
+                if(value){
+                    if(this.selectedOptions.length === 0){
+                       this.addForm.cat_pid = 0;
+                       this.addForm.cat_level = 0;
+                    } else if (this.selectedOptions.length === 1){
+                        this.addForm.cat_level = 1;
+                        this.addForm.cat_pid = this.selectedOptions[this.selectedOptions.length-1];//底层决定上层
+                    } else if (this.selectedOptions.length === 2){
+                        this.addForm.cat_level = 2;
+                        this.addForm.cat_pid = this.selectedOptions[this.selectedOptions.length-1];//底层决定上层
+                    }
+                    addCategory(this.addForm).then(res => {
+                        if(res.meta.status === 201){
+                            this.addDialogFormVisible = false;
+                            this.$message({
+                                type:'success',
+                                message:res.meta.msg
+                            })
+                        }    
+                    })
+                }
+            })
+        },
+        handleChange(value) {
+            this.selectedOptions = value;
+        }
     }
 }
 </script>
