@@ -110,3 +110,18 @@ export const getCategory = params => {
 export const addCategory = params => {
     return axios.post('categories',params).then(res => res.data);
 }
+
+// 删除分类
+export const deleteCategories = params => {
+    return axios.delete(`categories/${params}`).then(res => res.data);
+}
+
+// 根据id获取分类信息
+export const getCategoriesById = params => {
+    return axios.get(`categories/${params}`).then(res => res.data);
+}
+
+// 编辑提交分类
+export const editCategories = params => {
+    return axios.put(`categories/${params.cat_id}`,params).then(res => res.data);
+}

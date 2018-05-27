@@ -15,7 +15,7 @@
             </el-col>
         </el-row>
         <!-- 添加分类对话框 -->
-        <el-dialog title="添加用户" :visible.sync="addDialogFormVisible">
+        <el-dialog title="添加分类" :visible.sync="addDialogFormVisible">
             <el-form :model="addForm"  label-width="80px"  :rules="rules" ref="addCateForm">
                 <el-form-item label="分类名称" prop="cat_name">
                     <el-input v-model="addForm.cat_name" auto-complete="off"></el-input>
@@ -33,6 +33,18 @@
             <div slot="footer" class="dialog-footer">
                 <el-button @click="addCategory = false">取 消</el-button>
                 <el-button type="primary" @click="addCateSubmit('addCateForm')">确 定</el-button>
+            </div>
+        </el-dialog>
+        <!-- 编辑分类对话框 -->
+        <el-dialog title="编辑分类" :visible.sync="editDialogFormVisible">
+            <el-form :model="editForm"  label-width="80px"  :rules="rules" ref="editCateForm">
+                <el-form-item label="分类名称" prop="cat_name">
+                    <el-input v-model="editForm.cat_name" auto-complete="off"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addCategory = false">取 消</el-button>
+                <el-button type="primary" @click="editCateSubmit('editCateForm')">确 定</el-button>
             </div>
         </el-dialog>
         <tree-grid
@@ -61,12 +73,13 @@
 </template>
 <script>
 import TreeGrid from '@/components/TreeGrid/TreeGrid'
-import {getCategory,addCategory} from '@/api'
+import {getCategory,addCategory,deleteCategories,getCategoriesById,editCategories} from '@/api'
 export default {
     data(){
         return {
             loading:false,
             addDialogFormVisible:false,
+            editDialogFormVisible:false,
             props:{
                 label:'cat_name',
                 value:'cat_id'
@@ -98,6 +111,10 @@ export default {
                 cat_name:'',
                 cat_pid:0,
                 cat_level:0
+            },
+            editForm:{
+                cat_name:'',
+                cat_id:0
             },
             // 校验规则
             rules:{
@@ -132,11 +149,66 @@ export default {
             })
             this.loading = false;
         },
+        // 删除分类
         deleteCategory (cid) {
-            console.log(cid)
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+            }).then(() => {
+                deleteCategories(cid).then(res => {
+                    if(res.meta.status === 200){
+                        this.$message({
+                            type:'success',
+                            message:res.meta.msg
+                        })
+                        this.initList();
+                    } else {
+                        this.$message({
+                            type: 'warning',
+                            message: res.meta.msg
+                        });
+                    }
+                })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });          
+            });
+            
         },
+        // 编辑获取分类
         editCategory (cid) {
-            console.log(cid)
+            this.editDialogFormVisible = true;
+            getCategoriesById(cid).then(res => {
+                if(res.meta.status === 200){
+                    this.editForm.cat_name = res.data.cat_name;
+                    this.editForm.cat_id = res.data.cat_id;
+                }
+            })
+        },
+        // 编辑提交分类
+        editCateSubmit(formName){
+            this.$refs[formName].validate(value => {
+                if(value){
+                    editCategories(this.editForm).then(res => {
+                        if(res.meta.status === 200){
+                            this.editDialogFormVisible = false;
+                            this.$message({
+                                type:'success',
+                                message:res.meta.msg
+                            })
+                            this.initList();
+                        } else {
+                            this.$message({
+                                type:'warning',
+                                message:res.meta.msg
+                            })
+                        }
+                    })
+                }
+            })
         },
         //每页显示条数改变
         handleSizeChange(val) {
@@ -152,7 +224,6 @@ export default {
         showCategory(){
             this.addDialogFormVisible = true;
             getCategory({type:2}).then(res => {
-                console.log(res)
                 if(res.meta.status === 200){
                     this.options = res.data
                 }
@@ -177,6 +248,12 @@ export default {
                             this.addDialogFormVisible = false;
                             this.$message({
                                 type:'success',
+                                message:res.meta.msg
+                            })
+                            this.initList();
+                        } else {
+                            this.$message({
+                                type:'warning',
                                 message:res.meta.msg
                             })
                         }    
