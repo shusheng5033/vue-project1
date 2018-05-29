@@ -125,3 +125,10 @@ export const getCategoriesById = params => {
 export const editCategories = params => {
     return axios.put(`categories/${params.cat_id}`,params).then(res => res.data);
 }
+
+// 获取商品列表信息
+export const getGoods = params => {
+    return axios.get('goods',params).then(res => res.data);
+}
+
+// 添加商品信息

@@ -43,7 +43,7 @@
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="addCategory = false">取 消</el-button>
+                <el-button @click="editDialogFormVisible = false">取 消</el-button>
                 <el-button type="primary" @click="editCateSubmit('editCateForm')">确 定</el-button>
             </div>
         </el-dialog>
@@ -118,7 +118,7 @@ export default {
             },
             // 校验规则
             rules:{
-                cate_name: [
+                cat_name: [
                     { required: true, message: '请输入类名', trigger: 'blur' }
                 ],
             }
