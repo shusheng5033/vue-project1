@@ -9,6 +9,9 @@ import Roles from '@/views/jurisdiction/Roles'
 import Category from '@/views/category/Category'
 import Goods from '@/views/goods/Goods'
 import addGoods from '@/views/goods/addGoods'
+import orders from '@/views/orders/orders'
+import param from '@/views/goods/params'
+import data from '@/views/data/data'
 
 Vue.use(Router)
 
@@ -59,6 +62,21 @@ export default new Router({
           path:'toAdd',
           name:'addGoods',
           component:addGoods
+        },
+        {
+          path:'params',
+          name:'param',
+          component:param
+        },
+        {
+          path:'orders',
+          name:'orders',
+          component:orders
+        },
+        {
+          path:'reports',
+          name:'data',
+          component:data
         },
       ]
     }

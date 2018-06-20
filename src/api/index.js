@@ -131,4 +131,12 @@ export const getGoods = params => {
     return axios.get('goods',params).then(res => res.data);
 }
 
-// 添加商品信息
+// 获取报表testing（接口不清楚）
+export const getReport = params => {
+    return axios.get(`reports/${params.type}`).then(res => res.data);
+}
+
+// 获取订单列表
+export const getOrders = params => {
+    return axios.get('get',params).then(res.data);
+}
